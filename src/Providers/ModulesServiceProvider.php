@@ -104,8 +104,6 @@ class ModulesServiceProvider extends ServiceProvider
     {
         $directories = [
             app_path(),
-            app_path('Http/Controllers'),
-            app_path('Models'),
         ];
 
         foreach ($directories as $directory) {

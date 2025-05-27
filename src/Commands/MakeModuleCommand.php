@@ -54,9 +54,10 @@ class MakeModuleCommand extends Command
     {
         $modulesPath = config('modules.path', app_path());
         
-        // 确保app目录存在
+        // 检查app目录是否存在，不存在则提示错误
         if (!File::isDirectory($modulesPath)) {
-            File::makeDirectory($modulesPath, 0755, true);
+            $this->error("模块目录 [$modulesPath] 不存在，请先创建该目录!");
+            exit(1);
         }
     }
 
@@ -94,8 +95,7 @@ class MakeModuleCommand extends Command
     {
         // 在模块目录内创建所有子目录
         $directories = [
-            config('modules.structure.controllers.frontend'),
-            config('modules.structure.controllers.backend'),
+            config('modules.structure.controllers'),
             config('modules.structure.providers'),
             config('modules.structure.routes'),
             config('modules.structure.models'),

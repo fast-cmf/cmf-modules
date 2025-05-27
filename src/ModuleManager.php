@@ -32,9 +32,8 @@ class ModuleManager
     {
         $modulesPath = config('modules.path', app_path());
 
-        // 确保模块目录存在
+        // 如果模块目录不存在，则直接返回
         if (!File::isDirectory($modulesPath)) {
-            File::makeDirectory($modulesPath, 0755, true);
             return;
         }
 
@@ -73,8 +72,12 @@ class ModuleManager
         $directories = [];
         
         // 直接使用app目录下的子目录作为模块
-        // 但排除一些Laravel默认目录
-        $excludedDirs = ['Http', 'Console', 'Exceptions', 'Providers', 'Events', 'Jobs', 'Mail', 'Notifications', 'Policies', 'Rules'];
+        // 但排除一些Laravel默认目录和我们自己的目录
+        $excludedDirs = [
+            'Http', 'Console', 'Exceptions', 'Providers', 'Events', 
+            'Jobs', 'Mail', 'Notifications', 'Policies', 'Rules', 
+            'Models', 'Middleware', 'Listeners', 'View', 'Services'
+        ];
         
         $allDirs = File::directories($basePath);
         
