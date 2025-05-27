@@ -27,7 +27,7 @@ class ThemeViewFinder extends FileViewFinder
         
         // 如果主题存在，添加主题视图路径
         if ($theme->exists()) {
-            $themePath = $theme->getThemePath() . '/' . config('themes.structure.views', 'views');
+            $themePath = $theme->getThemePath();
             
             if (is_dir($themePath)) {
                 // 将主题视图路径添加到视图路径的最前面
@@ -58,7 +58,7 @@ class ThemeViewFinder extends FileViewFinder
             
             // 只在主题目录中查找
             if ($this->theme && $this->theme->exists()) {
-                $themePath = $this->theme->getThemePath() . '/' . config('themes.structure.views', 'views');
+                $themePath = $this->theme->getThemePath();
                 
                 // 如果是绝对路径（以/开头）
                 if (strpos($name, '/') === 0) {
