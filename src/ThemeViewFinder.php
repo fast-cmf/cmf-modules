@@ -51,6 +51,35 @@ class ThemeViewFinder extends FileViewFinder
             }
         }
         
+        // 解析视图路径
+        $parts = explode('.', $name);
+        
+        // 如果是应用视图
+        if (count($parts) >= 1) {
+            $module = $parts[0];
+            
+            // 如果是应用的公共视图
+            if (count($parts) >= 3 && $parts[1] === 'public') {
+                $viewName = $parts[2];
+                $path = $this->getThemeViewPath($theme) . '/' . $module . '/public/' . $viewName . '.blade.php';
+                
+                if (file_exists($path)) {
+                    return $path;
+                }
+            }
+            
+            // 如果是应用的控制器视图
+            if (count($parts) >= 3) {
+                $controller = $parts[1];
+                $method = $parts[2];
+                $path = $this->getThemeViewPath($theme) . '/' . $module . '/' . $controller . '/' . $method . '.blade.php';
+                
+                if (file_exists($path)) {
+                    return $path;
+                }
+            }
+        }
+        
         // 常规路径查找
         $path = $this->getThemeViewPath($theme) . '/' . str_replace('.', '/', $name) . '.blade.php';
         
@@ -77,6 +106,35 @@ class ThemeViewFinder extends FileViewFinder
             }
         }
         
+        // 解析视图路径
+        $parts = explode('.', $name);
+        
+        // 如果是应用视图
+        if (count($parts) >= 1) {
+            $module = $parts[0];
+            
+            // 如果是公共视图
+            if ($module === 'public' || (count($parts) >= 2 && $parts[1] === 'public')) {
+                $viewName = $module === 'public' ? $parts[1] : $parts[2];
+                $path = $this->getThemeViewPath($theme) . '/public/' . $viewName . '.blade.php';
+                
+                if (file_exists($path)) {
+                    return $path;
+                }
+            }
+            
+            // 如果是应用的控制器视图
+            if (count($parts) >= 3) {
+                $controller = 'admin_' . $parts[1];
+                $method = $parts[2];
+                $path = $this->getThemeViewPath($theme) . '/' . $module . '/' . $controller . '/' . $method . '.blade.php';
+                
+                if (file_exists($path)) {
+                    return $path;
+                }
+            }
+        }
+        
         // 常规路径查找
         $path = $this->getThemeViewPath($theme) . '/' . str_replace('.', '/', $name) . '.blade.php';
         
@@ -95,11 +153,34 @@ class ThemeViewFinder extends FileViewFinder
         list($module, $view) = explode('::', $name);
         $theme = Theme::current()->getName();
         
-        // 先检查主题中的模块视图
-        $themePath = $this->getThemeViewPath($theme) . '/modules/' . $module . '/' . str_replace('.', '/', $view) . '.blade.php';
+        // 解析视图路径
+        $viewParts = explode('.', $view);
         
-        if (file_exists($themePath)) {
-            return $themePath;
+        // 如果是控制器视图
+        if (count($viewParts) >= 2) {
+            $controller = $viewParts[0];
+            $method = $viewParts[1];
+            
+            // 构建视图路径：theme/default/blog/index/index.blade.php
+            $themePath = $this->getThemeViewPath($theme) . '/' . $module . '/' . $controller . '/' . $method . '.blade.php';
+            
+            if (file_exists($themePath)) {
+                return $themePath;
+            }
+        }
+        
+        // 如果是公共视图
+        if ($viewParts[0] === 'public') {
+            // 移除public前缀
+            array_shift($viewParts);
+            $publicView = implode('/', $viewParts);
+            
+            // 构建视图路径：theme/default/blog/public/xxx.blade.php
+            $themePath = $this->getThemeViewPath($theme) . '/' . $module . '/public/' . $publicView . '.blade.php';
+            
+            if (file_exists($themePath)) {
+                return $themePath;
+            }
         }
         
         // 如果主题中没有，则尝试使用默认视图查找
@@ -117,11 +198,34 @@ class ThemeViewFinder extends FileViewFinder
         // 从视图名称中移除admin.前缀
         $view = str_replace('admin.', '', $view);
         
-        // 先检查后台主题中的模块视图
-        $themePath = $this->getThemeViewPath($theme) . '/modules/' . $module . '/' . str_replace('.', '/', $view) . '.blade.php';
+        // 解析视图路径
+        $viewParts = explode('.', $view);
         
-        if (file_exists($themePath)) {
-            return $themePath;
+        // 如果是控制器视图
+        if (count($viewParts) >= 2) {
+            $controller = 'admin_' . $viewParts[0];
+            $method = $viewParts[1];
+            
+            // 构建视图路径：theme/admin_default/blog/admin_index/index.blade.php
+            $themePath = $this->getThemeViewPath($theme) . '/' . $module . '/' . $controller . '/' . $method . '.blade.php';
+            
+            if (file_exists($themePath)) {
+                return $themePath;
+            }
+        }
+        
+        // 如果是公共视图
+        if ($viewParts[0] === 'public') {
+            // 移除public前缀
+            array_shift($viewParts);
+            $publicView = implode('/', $viewParts);
+            
+            // 构建视图路径：theme/admin_default/public/xxx.blade.php
+            $themePath = $this->getThemeViewPath($theme) . '/public/' . $publicView . '.blade.php';
+            
+            if (file_exists($themePath)) {
+                return $themePath;
+            }
         }
         
         // 如果后台主题中没有，则尝试使用默认视图查找

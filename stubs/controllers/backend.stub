@@ -11,6 +11,9 @@ class Admin{{ModuleName}}Controller extends AdminBaseController
      */
     public function index()
     {
+        // 这里可以使用公共视图组件
+        // 例如：$this->assign('page_title', '{{ModuleName}}管理');
+        
         return $this->view();
     }
     
@@ -19,6 +22,9 @@ class Admin{{ModuleName}}Controller extends AdminBaseController
      */
     public function create()
     {
+        // 可以直接使用主题中的视图
+        // 也可以使用公共视图组件
+        
         return $this->view();
     }
     
@@ -36,6 +42,9 @@ class Admin{{ModuleName}}Controller extends AdminBaseController
      */
     public function edit($id)
     {
+        // 可以直接使用主题中的视图
+        // 也可以使用公共视图组件
+        
         return $this->view('', ['id' => $id]);
     }
     

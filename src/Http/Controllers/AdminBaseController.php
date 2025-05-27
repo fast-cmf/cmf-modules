@@ -51,6 +51,12 @@ class AdminBaseController extends Controller
         elseif (strpos($template, '/') === 0) {
             $template = 'admin::' . substr($template, 1);
         }
+        // 如果不包含模块名，添加当前模块名
+        elseif (strpos($template, '.') === false) {
+            $moduleName = $this->getModuleName();
+            $controller = 'admin_index';
+            $template = "{$moduleName}.{$controller}.{$template}";
+        }
         
         return view($template, $data);
     }
@@ -72,14 +78,14 @@ class AdminBaseController extends Controller
         // 移除Controller后缀
         $controller = str_replace('Controller', '', $controller);
         
-        // 转换为蛇形命名
-        $controller = Str::snake($controller);
+        // 转换为小写，保留admin_前缀
+        $controller = 'admin_' . strtolower(str_replace('Admin', '', $controller));
         
         // 获取当前模块名
         $moduleName = $this->getModuleName();
         
-        // 构建视图路径
-        return "admin::{$moduleName}/{$controller}/{$method}";
+        // 构建视图路径 - 使用模块名/控制器名/方法名的结构
+        return "{$moduleName}.{$controller}.{$method}";
     }
     
     /**

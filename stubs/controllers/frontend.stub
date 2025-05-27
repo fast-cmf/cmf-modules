@@ -11,6 +11,9 @@ class {{ModuleName}}Controller extends HomeBaseController
      */
     public function index()
     {
+        // 这里可以使用公共视图组件
+        // 例如：$this->assign('header_data', ['title' => '{{ModuleName}}']);
+        
         return $this->view();
     }
     
@@ -19,6 +22,9 @@ class {{ModuleName}}Controller extends HomeBaseController
      */
     public function show($id)
     {
+        // 可以直接使用主题中的视图
+        // 也可以使用公共视图组件
+        
         return $this->view('', ['id' => $id]);
     }
 } 
