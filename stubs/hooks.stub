@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * {{ModuleName}} 模块钩子
+ */
+ 
+use Fastcmf\Modules\Facades\Hook;
+
+/**
+ * 注册模块钩子
+ * 
+ * 示例:
+ * 
+ * Hook::listen('user.registered', function($user) {
+ *     // 处理用户注册事件
+ *     return $user;
+ * });
+ * 
+ * Hook::listen('post.content', function($content) {
+ *     // 过滤内容
+ *     return $content;
+ * });
+ */
+
+// 模块启动时
+Hook::listen('module.boot.after', function($module) {
+    if ($module->getName() === '{{ModuleName}}') {
+        // 模块启动后的操作
+    }
+    return $module;
+}); 

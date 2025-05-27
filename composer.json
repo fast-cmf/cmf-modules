@@ -1,7 +1,7 @@
 {
     "name": "fast-cmf/cmf-modules",
     "description": "The modules file",
-    "keywords": ["laravel", "modules", "cmf-modules"],
+    "keywords": ["laravel", "modules", "cmf-modules","themes", "hooks"],
     "license": "Apache-2.0",
     "authors": [
         {
@@ -21,10 +21,13 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Fastcmf\\Modules\\Providers\\ModulesServiceProvider"
+                "Fastcmf\\Modules\\Providers\\ModulesServiceProvider",
+                "Fastcmf\\Modules\\Providers\\ThemeServiceProvider"
             ],
             "aliases": {
-                "Module": "Fastcmf\\Modules\\Facades\\Module"
+                "Module": "Fastcmf\\Modules\\Facades\\Module",
+                "Theme": "Fastcmf\\Modules\\Facades\\Theme",
+                "Hook": "Fastcmf\\Modules\\Facades\\Hook"
             }
         }
     }

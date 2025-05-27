@@ -1,0 +1,7 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::prefix('api/{{module_name}}')->group(function () {
+    // API路由定义
+}); 

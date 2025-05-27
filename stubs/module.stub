@@ -1,0 +1,7 @@
+{
+    "name": "{{ModuleName}}",
+    "description": "{{ModuleName}} module",
+    "enabled": true,
+    "version": "1.0.0",
+    "dependencies": []
+} 

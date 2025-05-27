@@ -13,7 +13,7 @@ class {{ModuleName}}ServiceProvider extends ServiceProvider
     {
         $this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
         $this->loadViewsFrom(__DIR__ . '/../Views', '{{moduleName}}');
-
+        
         // 加载迁移文件
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
     }
@@ -25,4 +25,4 @@ class {{ModuleName}}ServiceProvider extends ServiceProvider
     {
         //
     }
-}
+} 

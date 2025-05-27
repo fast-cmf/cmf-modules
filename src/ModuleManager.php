@@ -1,9 +1,4 @@
 <?php
-// +----------------------------------------------------------------------
-// | ModuleManager.php模块业务逻辑
-// +----------------------------------------------------------------------
-// | Author: LuYuan 758899293@qq.com
-// +----------------------------------------------------------------------
 
 namespace Fastcmf\Modules;
 
@@ -37,16 +32,32 @@ class ModuleManager
     {
         $modulesPath = config('modules.path', app_path('Modules'));
 
+        // 确保模块目录存在
         if (!File::isDirectory($modulesPath)) {
+            File::makeDirectory($modulesPath, 0755, true);
             return;
         }
 
         $directories = File::directories($modulesPath);
 
+        // 触发模块发现前钩子
+        Hook::trigger('modules.discover.before', $directories);
+
         foreach ($directories as $directory) {
             $name = basename($directory);
-            $this->modules[$name] = new Module($name, $directory);
+            $module = new Module($name, $directory);
+            
+            // 检查模块是否启用
+            if ($module->isEnabled()) {
+                $this->modules[$name] = $module;
+                
+                // 触发模块发现钩子
+                Hook::trigger('module.discovered', $module);
+            }
         }
+        
+        // 触发模块发现后钩子
+        Hook::trigger('modules.discover.after', $this->modules);
     }
 
     /**
@@ -54,18 +65,38 @@ class ModuleManager
      */
     public function boot(Module $module)
     {
-        // 注册服务提供者
-        $providerPath = $module->getPath() . '/' . config('modules.structure.providers') .
-            '/' . $module->getName() . 'ServiceProvider.php';
-
-        if (File::exists($providerPath)) {
-            $namespace = config('modules.namespace') . '\\' . $module->getName() .
-                '\\' . config('modules.structure.providers') . '\\' .
-                $module->getName() . 'ServiceProvider';
-
-            if (class_exists($namespace)) {
-                $this->app->register($namespace);
+        try {
+            // 触发模块启动前钩子
+            Hook::trigger('module.boot.before', $module);
+            
+            // 注册模块钩子
+            $module->registerHooks();
+            
+            // 注册服务提供者
+            $providerPath = $module->getPath() . '/' . config('modules.structure.providers') . 
+                          '/' . $module->getName() . 'ServiceProvider.php';
+                        
+            if (File::exists($providerPath)) {
+                $namespace = config('modules.namespace') . '\\' . $module->getName() . 
+                           '\\' . config('modules.structure.providers') . '\\' . 
+                           $module->getName() . 'ServiceProvider';
+                
+                if (class_exists($namespace)) {
+                    $this->app->register($namespace);
+                }
             }
+            
+            // 触发模块启动后钩子
+            Hook::trigger('module.boot.after', $module);
+        } catch (\Exception $e) {
+            // 记录错误但不中断应用
+            \Log::error('模块启动失败: ' . $module->getName() . ' - ' . $e->getMessage());
+            
+            // 触发模块启动失败钩子
+            Hook::trigger('module.boot.failed', [
+                'module' => $module,
+                'error' => $e
+            ]);
         }
     }
 
@@ -99,13 +130,8 @@ class ModuleManager
     public function enable($name)
     {
         if ($this->has($name)) {
-            // 更新模块配置为启用状态
             $module = $this->find($name);
-            $configPath = $module->getPath() . '/module.json';
-            $config = json_decode(File::get($configPath), true);
-            $config['enabled'] = true;
-            File::put($configPath, json_encode($config, JSON_PRETTY_PRINT));
-            return true;
+            return $module->enable();
         }
         return false;
     }
@@ -116,14 +142,59 @@ class ModuleManager
     public function disable($name)
     {
         if ($this->has($name)) {
-            // 更新模块配置为禁用状态
             $module = $this->find($name);
-            $configPath = $module->getPath() . '/module.json';
-            $config = json_decode(File::get($configPath), true);
-            $config['enabled'] = false;
-            File::put($configPath, json_encode($config, JSON_PRETTY_PRINT));
-            return true;
+            return $module->disable();
         }
         return false;
     }
-}
+    
+    /**
+     * 安装模块
+     */
+    public function install($name, $path = null)
+    {
+        // 触发模块安装前钩子
+        Hook::trigger('module.install.before', $name);
+        
+        // 实际安装逻辑...
+        $modulesPath = config('modules.path', app_path('Modules'));
+        $modulePath = $path ?: $modulesPath . '/' . $name;
+        
+        if (!File::isDirectory($modulePath)) {
+            return false;
+        }
+        
+        $module = new Module($name, $modulePath);
+        $this->modules[$name] = $module;
+        
+        // 触发模块安装后钩子
+        Hook::trigger('module.install.after', $module);
+        
+        return $module;
+    }
+    
+    /**
+     * 卸载模块
+     */
+    public function uninstall($name)
+    {
+        if (!$this->has($name)) {
+            return false;
+        }
+        
+        $module = $this->find($name);
+        
+        // 触发模块卸载前钩子
+        Hook::trigger('module.uninstall.before', $module);
+        
+        // 实际卸载逻辑...
+        // 这里可以添加删除文件等操作，但需要谨慎处理
+        
+        unset($this->modules[$name]);
+        
+        // 触发模块卸载后钩子
+        Hook::trigger('module.uninstall.after', $name);
+        
+        return true;
+    }
+} 

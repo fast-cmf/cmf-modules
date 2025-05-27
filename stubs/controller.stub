@@ -1,0 +1,16 @@
+<?php
+
+namespace {{ModuleName}}\Controllers;
+
+use App\Http\Controllers\Controller;
+
+class {{ModuleName}}Controller extends Controller
+{
+    /**
+     * 显示主页
+     */
+    public function index()
+    {
+        return view('{{moduleName}}::index');
+    }
+} 
