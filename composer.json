@@ -1,0 +1,25 @@
+{
+    "name": "fast-cmf/cmf-root",
+    "description": "The files in FastCmf root dir",
+    "type": "composer-plugin",
+    "license": "Apache-2.0",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fastcmf\\Modules\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Fastcmf\\Modules\\Providers\\ModulesServiceProvider"
+            ],
+            "aliases": {
+                "Module": "Fastcmf\\Modules\\Facades\\Module"
+            }
+        }
+    }
+}
