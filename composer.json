@@ -1,8 +1,14 @@
 {
-    "name": "fast-cmf/cmf-root",
-    "description": "The files in FastCmf root dir",
-    "type": "composer-plugin",
+    "name": "fast-cmf/cmf-modules",
+    "description": "The modules file",
+    "keywords": ["laravel", "modules", "cmf-modules"],
     "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "LuYuan",
+            "email": "758899293@qq.com"
+        }
+    ],
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0"
