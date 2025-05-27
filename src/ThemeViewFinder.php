@@ -17,8 +17,17 @@ class ThemeViewFinder extends FileViewFinder
             return $this->findThemeView($name);
         }
         
+        // 如果是后台主题视图
+        if (strpos($name, 'admin::') === 0) {
+            return $this->findAdminThemeView($name);
+        }
+        
         // 如果是模块视图
         if (strpos($name, '::') !== false) {
+            // 检查是否是后台视图
+            if (strpos($name, 'admin.') !== false) {
+                return $this->findAdminModuleView($name);
+            }
             return $this->findModuleView($name);
         }
         
@@ -34,6 +43,30 @@ class ThemeViewFinder extends FileViewFinder
         $theme = Theme::current()->getName();
         $name = str_replace('theme::', '', $name);
         
+        // 检查是否是直接路径
+        if (strpos($name, '/') === 0) {
+            $path = $this->getThemeViewPath($theme) . $name . '.blade.php';
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+        
+        // 解析模块名、控制器和方法
+        $parts = explode('/', $name);
+        if (count($parts) >= 3) {
+            $moduleName = $parts[0];
+            $controller = $parts[1];
+            $method = $parts[2];
+            
+            // 尝试查找视图文件
+            $path = $this->getThemeViewPath($theme) . "/{$moduleName}/{$controller}/{$method}.blade.php";
+            
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+        
+        // 常规路径查找
         $path = $this->getThemeViewPath($theme) . '/' . str_replace('.', '/', $name) . '.blade.php';
         
         if (file_exists($path)) {
@@ -41,6 +74,47 @@ class ThemeViewFinder extends FileViewFinder
         }
         
         throw new \InvalidArgumentException("View [{$name}] not found in theme [{$theme}].");
+    }
+    
+    /**
+     * 查找后台主题视图
+     */
+    protected function findAdminThemeView($name)
+    {
+        $theme = Theme::adminCurrent()->getName();
+        $name = str_replace('admin::', '', $name);
+        
+        // 检查是否是直接路径
+        if (strpos($name, '/') === 0) {
+            $path = $this->getThemeViewPath($theme) . $name . '.blade.php';
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+        
+        // 解析模块名、控制器和方法
+        $parts = explode('/', $name);
+        if (count($parts) >= 3) {
+            $moduleName = $parts[0];
+            $controller = $parts[1];
+            $method = $parts[2];
+            
+            // 尝试查找视图文件
+            $path = $this->getThemeViewPath($theme) . "/{$moduleName}/{$controller}/{$method}.blade.php";
+            
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+        
+        // 常规路径查找
+        $path = $this->getThemeViewPath($theme) . '/' . str_replace('.', '/', $name) . '.blade.php';
+        
+        if (file_exists($path)) {
+            return $path;
+        }
+        
+        throw new \InvalidArgumentException("View [{$name}] not found in admin theme [{$theme}].");
     }
     
     /**
@@ -52,13 +126,35 @@ class ThemeViewFinder extends FileViewFinder
         $theme = Theme::current()->getName();
         
         // 先检查主题中的模块视图
-        $themePath = $this->getThemeViewPath($theme) . '/modules/' . $module . '/' . str_replace('.', '/', $view) . '.blade.php';
+        $themePath = $this->getThemeViewPath($theme) . '/modules/' . $module . '/' . strtolower($module) . '/' . str_replace('.', '/', $view) . '.blade.php';
         
         if (file_exists($themePath)) {
             return $themePath;
         }
         
         // 如果主题中没有，则尝试使用默认视图查找
+        return parent::find($name);
+    }
+    
+    /**
+     * 查找后台模块视图
+     */
+    protected function findAdminModuleView($name)
+    {
+        list($module, $view) = explode('::', $name);
+        $theme = Theme::adminCurrent()->getName();
+        
+        // 从视图名称中移除admin.前缀
+        $view = str_replace('admin.', '', $view);
+        
+        // 先检查后台主题中的模块视图
+        $themePath = $this->getThemeViewPath($theme) . '/modules/' . $module . '/' . strtolower($module) . '/' . str_replace('.', '/', $view) . '.blade.php';
+        
+        if (file_exists($themePath)) {
+            return $themePath;
+        }
+        
+        // 如果后台主题中没有，则尝试使用默认视图查找
         return parent::find($name);
     }
     

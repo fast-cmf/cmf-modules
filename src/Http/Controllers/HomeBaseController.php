@@ -4,6 +4,7 @@ namespace Fastcmf\Modules\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Fastcmf\Modules\Facades\Theme;
+use Illuminate\Support\Str;
 
 class HomeBaseController extends Controller
 {
@@ -37,10 +38,67 @@ class HomeBaseController extends Controller
     /**
      * 渲染视图
      */
-    protected function view($template, $data = [])
+    protected function view($template = '', $data = [])
     {
         $data = array_merge($this->viewData, $data);
+        
+        // 如果模板为空，自动获取当前控制器和方法对应的视图
+        if (empty($template)) {
+            $template = $this->getAutoTemplate();
+        }
+        // 如果模板以/开头，表示从主题根目录加载
+        elseif (strpos($template, '/') === 0) {
+            $template = 'theme::' . substr($template, 1);
+        }
+        
         return view($template, $data);
+    }
+    
+    /**
+     * 自动获取视图模板
+     */
+    protected function getAutoTemplate()
+    {
+        // 获取当前请求的控制器和方法
+        $action = app('request')->route()->getActionName();
+        
+        // 解析控制器类名和方法名
+        list($controller, $method) = explode('@', $action);
+        
+        // 获取控制器短名称（不含命名空间）
+        $controller = class_basename($controller);
+        
+        // 移除Controller后缀
+        $controller = str_replace('Controller', '', $controller);
+        
+        // 转换为蛇形命名
+        $controller = Str::snake($controller);
+        
+        // 获取当前模块名
+        $moduleName = $this->getModuleName();
+        
+        // 构建视图路径
+        return "theme::{$moduleName}/{$controller}/{$method}";
+    }
+    
+    /**
+     * 获取当前模块名
+     */
+    protected function getModuleName()
+    {
+        // 获取当前控制器的类名
+        $class = get_class($this);
+        
+        // 解析命名空间
+        $parts = explode('\\', $class);
+        
+        // 模块名应该是命名空间的第二部分
+        if (count($parts) >= 3 && $parts[0] === 'App') {
+            return Str::snake($parts[1]);
+        }
+        
+        // 如果无法确定模块名，返回默认值
+        return 'common';
     }
 
     /**

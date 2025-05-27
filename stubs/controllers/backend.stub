@@ -1,0 +1,99 @@
+<?php
+
+namespace App\{{ModuleName}}\Http\Controllers;
+
+use Fastcmf\Modules\Http\Controllers\AdminBaseController;
+use Fastcmf\Modules\Facades\Theme;
+
+class Admin{{ModuleName}}Controller extends AdminBaseController
+{
+    /**
+     * 显示列表页
+     */
+    public function index()
+    {
+        // 尝试使用主题中的模块视图
+        $theme = Theme::adminCurrent();
+        $viewName = '{{ModuleName}}::admin.{{ModuleName}}.index';
+        
+        // 如果主题中存在该模块的视图，则使用主题视图
+        $themePath = config('themes.path', public_path('themes')) . '/' . $theme->getName();
+        $moduleViewPath = $themePath . '/' . config('themes.structure.views', 'views') . '/modules/{{ModuleName}}/{{module_name}}/index.blade.php';
+        
+        if (file_exists($moduleViewPath)) {
+            return $this->view($viewName);
+        }
+        
+        // 否则使用主题的默认视图
+        return $this->view('theme::admin.index', ['module' => '{{ModuleName}}']);
+    }
+    
+    /**
+     * 显示创建页
+     */
+    public function create()
+    {
+        // 尝试使用主题中的模块视图
+        $theme = Theme::adminCurrent();
+        $viewName = '{{ModuleName}}::admin.{{ModuleName}}.create';
+        
+        // 如果主题中存在该模块的视图，则使用主题视图
+        $themePath = config('themes.path', public_path('themes')) . '/' . $theme->getName();
+        $moduleViewPath = $themePath . '/' . config('themes.structure.views', 'views') . '/modules/{{ModuleName}}/{{module_name}}/create.blade.php';
+        
+        if (file_exists($moduleViewPath)) {
+            return $this->view($viewName);
+        }
+        
+        // 否则使用主题的默认视图
+        return $this->view('theme::admin.form', ['module' => '{{ModuleName}}', 'action' => 'create']);
+    }
+    
+    /**
+     * 保存数据
+     */
+    public function store()
+    {
+        // 处理保存逻辑
+        return $this->adminSuccess('{{ModuleName}}添加成功');
+    }
+    
+    /**
+     * 显示编辑页
+     */
+    public function edit($id)
+    {
+        // 尝试使用主题中的模块视图
+        $theme = Theme::adminCurrent();
+        $viewName = '{{ModuleName}}::admin.{{ModuleName}}.edit';
+        
+        // 如果主题中存在该模块的视图，则使用主题视图
+        $themePath = config('themes.path', public_path('themes')) . '/' . $theme->getName();
+        $moduleViewPath = $themePath . '/' . config('themes.structure.views', 'views') . '/modules/{{ModuleName}}/{{module_name}}/edit.blade.php';
+        
+        if (file_exists($moduleViewPath)) {
+            return $this->view($viewName, ['id' => $id]);
+        }
+        
+        // 否则使用主题的默认视图
+        return $this->view('theme::admin.form', ['module' => '{{ModuleName}}', 'action' => 'edit', 'id' => $id]);
+    }
+    
+    /**
+     * 更新数据
+     */
+    public function update($id)
+    {
+        // 处理更新逻辑
+        return $this->adminSuccess('{{ModuleName}}更新成功');
+    }
+    
+    /**
+     * 删除数据
+     */
+    public function destroy($id)
+    {
+        // 处理删除逻辑
+        return $this->adminSuccess('{{ModuleName}}删除成功');
+    }
+} 

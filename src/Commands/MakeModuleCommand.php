@@ -301,11 +301,21 @@ class {$name}ServiceProvider extends ServiceProvider
         \$this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
         
         // 从主题目录加载视图
-        \$themePath = config('themes.path') . '/' . Theme::current()->getName();
-        \$viewsPath = \$themePath . '/' . config('themes.structure.views') . '/modules/{$name}';
+        // 前台主题
+        \$frontThemePath = config('themes.path', public_path('themes')) . '/' . Theme::current()->getName();
+        \$frontViewsPath = \$frontThemePath . '/' . config('themes.structure.views', 'views') . '/modules/{$name}';
         
-        if (is_dir(\$viewsPath)) {
-            \$this->loadViewsFrom(\$viewsPath, '{$name}');
+        if (is_dir(\$frontViewsPath)) {
+            \$this->loadViewsFrom(\$frontViewsPath, '{$name}');
+        }
+        
+        // 后台主题
+        \$adminThemePath = config('themes.path', public_path('themes')) . '/' . Theme::adminCurrent()->getName();
+        \$adminViewsPath = \$adminThemePath . '/' . config('themes.structure.views', 'views') . '/modules/{$name}';
+        
+        if (is_dir(\$adminViewsPath)) {
+            // 使用相同的命名空间，但优先级较低
+            \$this->loadViewsFrom(\$adminViewsPath, '{$name}');
         }
         
         // 加载迁移文件
@@ -331,6 +341,7 @@ PHP;
 namespace App\\{$name}\\Http\\Controllers;
 
 use Fastcmf\\Modules\\Http\\Controllers\\HomeBaseController;
+use Fastcmf\\Modules\\Facades\\Theme;
 
 class {$name}Controller extends HomeBaseController
 {
@@ -339,7 +350,20 @@ class {$name}Controller extends HomeBaseController
      */
     public function index()
     {
-        return \$this->view('{$name}::{$name}.index');
+        // 尝试使用主题中的模块视图
+        \$theme = Theme::current();
+        \$viewName = '{$name}::{$name}.index';
+        
+        // 如果主题中存在该模块的视图，则使用主题视图
+        \$themePath = config('themes.path', public_path('themes')) . '/' . \$theme->getName();
+        \$moduleViewPath = \$themePath . '/' . config('themes.structure.views', 'views') . '/modules/{$name}/' . strtolower('{$name}') . '/index.blade.php';
+        
+        if (file_exists(\$moduleViewPath)) {
+            return \$this->view(\$viewName);
+        }
+        
+        // 否则使用主题的默认视图
+        return \$this->view('theme::index', ['module' => '{$name}']);
     }
     
     /**
@@ -347,7 +371,20 @@ class {$name}Controller extends HomeBaseController
      */
     public function show(\$id)
     {
-        return \$this->view('{$name}::{$name}.show', ['id' => \$id]);
+        // 尝试使用主题中的模块视图
+        \$theme = Theme::current();
+        \$viewName = '{$name}::{$name}.show';
+        
+        // 如果主题中存在该模块的视图，则使用主题视图
+        \$themePath = config('themes.path', public_path('themes')) . '/' . \$theme->getName();
+        \$moduleViewPath = \$themePath . '/' . config('themes.structure.views', 'views') . '/modules/{$name}/' . strtolower('{$name}') . '/show.blade.php';
+        
+        if (file_exists(\$moduleViewPath)) {
+            return \$this->view(\$viewName, ['id' => \$id]);
+        }
+        
+        // 否则使用主题的默认视图
+        return \$this->view('theme::index', ['module' => '{$name}', 'id' => \$id]);
     }
 }
 PHP;
@@ -361,6 +398,7 @@ PHP;
 namespace App\\{$name}\\Http\\Controllers;
 
 use Fastcmf\\Modules\\Http\\Controllers\\AdminBaseController;
+use Fastcmf\\Modules\\Facades\\Theme;
 
 class Admin{$name}Controller extends AdminBaseController
 {
@@ -369,7 +407,20 @@ class Admin{$name}Controller extends AdminBaseController
      */
     public function index()
     {
-        return \$this->view('{$name}::admin.{$name}.index');
+        // 尝试使用主题中的模块视图
+        \$theme = Theme::adminCurrent();
+        \$viewName = '{$name}::admin.{$name}.index';
+        
+        // 如果主题中存在该模块的视图，则使用主题视图
+        \$themePath = config('themes.path', public_path('themes')) . '/' . \$theme->getName();
+        \$moduleViewPath = \$themePath . '/' . config('themes.structure.views', 'views') . '/modules/{$name}/' . strtolower('{$name}') . '/index.blade.php';
+        
+        if (file_exists(\$moduleViewPath)) {
+            return \$this->view(\$viewName);
+        }
+        
+        // 否则使用主题的默认视图
+        return \$this->view('theme::admin.index', ['module' => '{$name}']);
     }
     
     /**
@@ -377,7 +428,20 @@ class Admin{$name}Controller extends AdminBaseController
      */
     public function create()
     {
-        return \$this->view('{$name}::admin.{$name}.create');
+        // 尝试使用主题中的模块视图
+        \$theme = Theme::adminCurrent();
+        \$viewName = '{$name}::admin.{$name}.create';
+        
+        // 如果主题中存在该模块的视图，则使用主题视图
+        \$themePath = config('themes.path', public_path('themes')) . '/' . \$theme->getName();
+        \$moduleViewPath = \$themePath . '/' . config('themes.structure.views', 'views') . '/modules/{$name}/' . strtolower('{$name}') . '/create.blade.php';
+        
+        if (file_exists(\$moduleViewPath)) {
+            return \$this->view(\$viewName);
+        }
+        
+        // 否则使用主题的默认视图
+        return \$this->view('theme::admin.form', ['module' => '{$name}', 'action' => 'create']);
     }
     
     /**
@@ -394,7 +458,20 @@ class Admin{$name}Controller extends AdminBaseController
      */
     public function edit(\$id)
     {
-        return \$this->view('{$name}::admin.{$name}.edit', ['id' => \$id]);
+        // 尝试使用主题中的模块视图
+        \$theme = Theme::adminCurrent();
+        \$viewName = '{$name}::admin.{$name}.edit';
+        
+        // 如果主题中存在该模块的视图，则使用主题视图
+        \$themePath = config('themes.path', public_path('themes')) . '/' . \$theme->getName();
+        \$moduleViewPath = \$themePath . '/' . config('themes.structure.views', 'views') . '/modules/{$name}/' . strtolower('{$name}') . '/edit.blade.php';
+        
+        if (file_exists(\$moduleViewPath)) {
+            return \$this->view(\$viewName, ['id' => \$id]);
+        }
+        
+        // 否则使用主题的默认视图
+        return \$this->view('theme::admin.form', ['module' => '{$name}', 'action' => 'edit', 'id' => \$id]);
     }
     
     /**

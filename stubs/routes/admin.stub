@@ -1,0 +1,13 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\{{ModuleName}}\Http\Controllers\Admin{{ModuleName}}Controller;
+
+Route::prefix('admin/{{module_name}}')->name('admin.{{module_name}}.')->middleware(['web', 'auth'])->group(function () {
+    Route::get('/', [Admin{{ModuleName}}Controller::class, 'index'])->name('index');
+    Route::get('/create', [Admin{{ModuleName}}Controller::class, 'create'])->name('create');
+    Route::post('/', [Admin{{ModuleName}}Controller::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [Admin{{ModuleName}}Controller::class, 'edit'])->name('edit');
+    Route::put('/{id}', [Admin{{ModuleName}}Controller::class, 'update'])->name('update');
+    Route::delete('/{id}', [Admin{{ModuleName}}Controller::class, 'destroy'])->name('destroy');
+}); 

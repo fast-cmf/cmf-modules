@@ -35,11 +35,28 @@ class Theme
     }
 
     /**
+     * 获取默认后台主题
+     */
+    public function getDefaultAdminTheme()
+    {
+        return Config::get('themes.admin_default', 'admin_default');
+    }
+
+    /**
      * 获取当前主题
      */
     public static function current()
     {
         $themeName = session('current_theme', Config::get('themes.default', 'default'));
+        return new static($themeName);
+    }
+
+    /**
+     * 获取当前后台主题
+     */
+    public static function adminCurrent()
+    {
+        $themeName = session('current_admin_theme', Config::get('themes.admin_default', 'admin_default'));
         return new static($themeName);
     }
 
