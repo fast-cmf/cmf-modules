@@ -5,6 +5,8 @@
 // | Author: LuYuan 758899293@qq.com
 // +----------------------------------------------------------------------
 
+namespace Fastcmf\Modules;
+
 use Illuminate\Support\Facades\File;
 use Illuminate\Contracts\Foundation\Application;
 
