@@ -92,4 +92,38 @@ class ModuleManager
     {
         return isset($this->modules[$name]);
     }
+
+    /**
+     * 启用模块
+     */
+    public function enable($name)
+    {
+        if ($this->has($name)) {
+            // 更新模块配置为启用状态
+            $module = $this->find($name);
+            $configPath = $module->getPath() . '/module.json';
+            $config = json_decode(File::get($configPath), true);
+            $config['enabled'] = true;
+            File::put($configPath, json_encode($config, JSON_PRETTY_PRINT));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 禁用模块
+     */
+    public function disable($name)
+    {
+        if ($this->has($name)) {
+            // 更新模块配置为禁用状态
+            $module = $this->find($name);
+            $configPath = $module->getPath() . '/module.json';
+            $config = json_decode(File::get($configPath), true);
+            $config['enabled'] = false;
+            File::put($configPath, json_encode($config, JSON_PRETTY_PRINT));
+            return true;
+        }
+        return false;
+    }
 }

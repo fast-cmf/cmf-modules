@@ -41,4 +41,27 @@ class Module
     {
         return $this->path;
     }
+
+
+    /**
+     * 检查模块依赖
+     */
+    public function checkDependencies()
+    {
+        $configPath = $this->getPath() . '/module.json';
+        if (File::exists($configPath)) {
+            $config = json_decode(File::get($configPath), true);
+
+            if (isset($config['dependencies']) && is_array($config['dependencies'])) {
+                foreach ($config['dependencies'] as $dependency) {
+                    if (!app('modules')->has($dependency)) {
+                        throw new \Exception("Module {$this->name} requires {$dependency} module.");
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
 }
