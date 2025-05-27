@@ -17,7 +17,7 @@ class ModulesServiceProvider extends ServiceProvider
     /**
      * 启动服务
      */
-    public function boot(Module $module)
+    public function boot()
     {
         $this->publishes([
             __DIR__ . '/../../config/modules.php' => config_path('modules.php'),
@@ -31,15 +31,6 @@ class ModulesServiceProvider extends ServiceProvider
 
         $this->bootModules();
 
-        // 发布模块资源
-        if ($this->app->runningInConsole()) {
-            $assetsPath = $module->getPath() . '/Resources/assets';
-            if (File::isDirectory($assetsPath)) {
-                $this->publishes([
-                    $assetsPath => public_path('modules/' . strtolower($module->getName())),
-                ], 'modules-assets');
-            }
-        }
     }
 
     /**
@@ -55,9 +46,7 @@ class ModulesServiceProvider extends ServiceProvider
             return new ModuleManager($app);
         });
 
-        $this->app->singleton('theme', function ($app) {
-            return new Theme();
-        });
+
     }
 
     /**
