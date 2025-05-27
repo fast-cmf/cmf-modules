@@ -1,6 +1,5 @@
-# cmf-root
-The files in ThinkCMF root dir!
+# fast-cmf/cmf-modules
+The modules file
 
 ## 更新日志
-### v2.0.0
-* 兼容8.0
+### v1.0.0
