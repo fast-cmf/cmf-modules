@@ -10,6 +10,7 @@ use Illuminate\Support\ServiceProvider;
 use Fastcmf\Modules\Commands\MakeModuleCommand;
 use Fastcmf\Modules\ModuleManager;
 use Fastcmf\Modules\Theme;
+use Module;
 
 class ModulesServiceProvider extends ServiceProvider
 {
