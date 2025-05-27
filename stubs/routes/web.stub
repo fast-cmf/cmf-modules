@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use {{ModuleName}}\Controllers\{{ModuleName}}Controller;
+use App\{{ModuleName}}\Http\Controllers\Frontend\{{ModuleName}}Controller;
 
-Route::prefix('{{module_name}}')->group(function () {
-    Route::get('/', [{{ModuleName}}Controller::class, 'index']);
+Route::prefix('{{module_name}}')->name('{{module_name}}.')->group(function () {
+    Route::get('/', [{{ModuleName}}Controller::class, 'index'])->name('index');
+    Route::get('/{id}', [{{ModuleName}}Controller::class, 'show'])->name('show');
 }); 

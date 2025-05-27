@@ -1,6 +1,6 @@
 <?php
 
-namespace {{ModuleName}}\Providers;
+namespace App\{{ModuleName}}\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -12,7 +12,10 @@ class {{ModuleName}}ServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
-        $this->loadViewsFrom(__DIR__ . '/../Views', '{{moduleName}}');
+        $this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
+        $this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
+        
+        $this->loadViewsFrom(__DIR__ . '/../Resources/views', '{{ModuleName}}');
         
         // 加载迁移文件
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');

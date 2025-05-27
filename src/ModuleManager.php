@@ -30,7 +30,7 @@ class ModuleManager
      */
     public function discover()
     {
-        $modulesPath = config('modules.path', app_path('Modules'));
+        $modulesPath = config('modules.path', app_path());
 
         // 确保模块目录存在
         if (!File::isDirectory($modulesPath)) {
@@ -38,12 +38,13 @@ class ModuleManager
             return;
         }
 
-        $directories = File::directories($modulesPath);
+        // 获取模块目录
+        $moduleDirectories = $this->getModuleDirectories($modulesPath);
 
         // 触发模块发现前钩子
-        Hook::trigger('modules.discover.before', $directories);
+        Hook::trigger('modules.discover.before', $moduleDirectories);
 
-        foreach ($directories as $directory) {
+        foreach ($moduleDirectories as $directory) {
             $name = basename($directory);
             $module = new Module($name, $directory);
             
@@ -58,6 +59,40 @@ class ModuleManager
         
         // 触发模块发现后钩子
         Hook::trigger('modules.discover.after', $this->modules);
+    }
+
+    /**
+     * 获取模块目录
+     * 
+     * @param string $basePath
+     * @return array
+     */
+    protected function getModuleDirectories($basePath)
+    {
+        // 在app目录下，我们需要查找特定的标记文件来识别模块
+        $directories = [];
+        
+        // 直接使用app目录下的子目录作为模块
+        // 但排除一些Laravel默认目录
+        $excludedDirs = ['Http', 'Console', 'Exceptions', 'Providers', 'Events', 'Jobs', 'Mail', 'Notifications', 'Policies', 'Rules'];
+        
+        $allDirs = File::directories($basePath);
+        
+        foreach ($allDirs as $dir) {
+            $dirName = basename($dir);
+            
+            // 排除Laravel默认目录
+            if (in_array($dirName, $excludedDirs)) {
+                continue;
+            }
+            
+            // 检查是否有module.json文件，这是模块的标志
+            if (File::exists($dir . '/module.json')) {
+                $directories[] = $dir;
+            }
+        }
+        
+        return $directories;
     }
 
     /**
@@ -157,7 +192,7 @@ class ModuleManager
         Hook::trigger('module.install.before', $name);
         
         // 实际安装逻辑...
-        $modulesPath = config('modules.path', app_path('Modules'));
+        $modulesPath = config('modules.path', app_path());
         $modulePath = $path ?: $modulesPath . '/' . $name;
         
         if (!File::isDirectory($modulePath)) {

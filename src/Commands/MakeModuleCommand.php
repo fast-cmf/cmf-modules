@@ -32,7 +32,7 @@ class MakeModuleCommand extends Command
         $this->ensureModulesDirectoryExists();
         
         // 模块路径
-        $path = config('modules.path', app_path('Modules')) . '/' . $name;
+        $path = config('modules.path', app_path()) . '/' . $name;
         
         // 检查模块是否已存在
         if (File::exists($path)) {
@@ -51,15 +51,9 @@ class MakeModuleCommand extends Command
      */
     protected function ensureModulesDirectoryExists()
     {
-        $modulesPath = config('modules.path', app_path('Modules'));
+        $modulesPath = config('modules.path', app_path());
         
         // 确保app目录存在
-        $appPath = app_path();
-        if (!File::isDirectory($appPath)) {
-            File::makeDirectory($appPath, 0755, true);
-        }
-        
-        // 确保Modules目录存在
         if (!File::isDirectory($modulesPath)) {
             File::makeDirectory($modulesPath, 0755, true);
         }
@@ -74,28 +68,16 @@ class MakeModuleCommand extends Command
         File::makeDirectory($path, 0755, true);
         
         // 创建子目录
-        foreach (config('modules.structure') as $directory) {
-            File::makeDirectory("$path/$directory", 0755, true);
-        }
+        $this->createModuleDirectories($name, $path);
         
         // 创建路由文件
-        $routesPath = "$path/" . config('modules.structure.routes');
-        File::put("$routesPath/web.php", $this->getStub('routes/web', $name));
-        File::put("$routesPath/api.php", $this->getStub('routes/api', $name));
+        $this->createRouteFiles($name, $path);
         
         // 创建服务提供者
-        $providersPath = "$path/" . config('modules.structure.providers');
-        File::put(
-            "$providersPath/{$name}ServiceProvider.php", 
-            $this->getStub('provider', $name)
-        );
+        $this->createServiceProvider($name, $path);
         
         // 创建控制器
-        $controllersPath = "$path/" . config('modules.structure.controllers');
-        File::put(
-            "$controllersPath/{$name}Controller.php", 
-            $this->getStub('controller', $name)
-        );
+        $this->createControllers($name, $path);
         
         // 创建模块配置文件
         File::put("$path/module.json", $this->getStub('module', $name));
@@ -105,9 +87,88 @@ class MakeModuleCommand extends Command
         
         // 创建默认视图文件
         $viewsPath = "$path/" . config('modules.structure.views');
-        if (!File::exists("$viewsPath/index.blade.php")) {
-            File::put("$viewsPath/index.blade.php", $this->getDefaultViewStub($name));
+        if (!File::exists("$viewsPath/{$name}/index.blade.php")) {
+            // 确保目录存在
+            File::makeDirectory("$viewsPath/{$name}", 0755, true, true);
+            File::put("$viewsPath/{$name}/index.blade.php", $this->getDefaultViewStub($name));
         }
+    }
+    
+    /**
+     * 创建模块目录结构
+     */
+    protected function createModuleDirectories($name, $path)
+    {
+        // 创建前台控制器目录
+        $frontendControllerPath = "$path/" . config('modules.structure.controllers.frontend');
+        File::makeDirectory($frontendControllerPath, 0755, true);
+        
+        // 创建后台控制器目录
+        $backendControllerPath = "$path/" . config('modules.structure.controllers.backend');
+        File::makeDirectory($backendControllerPath, 0755, true);
+        
+        // 创建其他目录
+        $directories = [
+            config('modules.structure.providers'),
+            config('modules.structure.views'),
+            config('modules.structure.routes'),
+            config('modules.structure.models'),
+            config('modules.structure.migrations'),
+            config('modules.structure.seeders'),
+        ];
+        
+        foreach ($directories as $directory) {
+            File::makeDirectory("$path/$directory", 0755, true);
+        }
+    }
+    
+    /**
+     * 创建路由文件
+     */
+    protected function createRouteFiles($name, $path)
+    {
+        $routesPath = "$path/" . config('modules.structure.routes');
+        
+        // 前台路由
+        File::put("$routesPath/web.php", $this->getStub('routes/web', $name));
+        
+        // API路由
+        File::put("$routesPath/api.php", $this->getStub('routes/api', $name));
+        
+        // 后台路由
+        File::put("$routesPath/admin.php", $this->getStub('routes/admin', $name));
+    }
+    
+    /**
+     * 创建服务提供者
+     */
+    protected function createServiceProvider($name, $path)
+    {
+        $providersPath = "$path/" . config('modules.structure.providers');
+        File::put(
+            "$providersPath/{$name}ServiceProvider.php", 
+            $this->getStub('provider', $name)
+        );
+    }
+    
+    /**
+     * 创建控制器
+     */
+    protected function createControllers($name, $path)
+    {
+        // 前台控制器
+        $frontendControllerPath = "$path/" . config('modules.structure.controllers.frontend');
+        File::put(
+            "$frontendControllerPath/{$name}Controller.php", 
+            $this->getStub('controllers/frontend', $name)
+        );
+        
+        // 后台控制器
+        $backendControllerPath = "$path/" . config('modules.structure.controllers.backend');
+        File::put(
+            "$backendControllerPath/{$name}Controller.php", 
+            $this->getStub('controllers/backend', $name)
+        );
     }
 
     /**
@@ -138,12 +199,16 @@ class MakeModuleCommand extends Command
         switch ($type) {
             case 'provider':
                 return $this->getDefaultProviderStub($name);
-            case 'controller':
-                return $this->getDefaultControllerStub($name);
+            case 'controllers/frontend':
+                return $this->getDefaultFrontendControllerStub($name);
+            case 'controllers/backend':
+                return $this->getDefaultBackendControllerStub($name);
             case 'routes/web':
                 return $this->getDefaultWebRouteStub($name);
             case 'routes/api':
                 return $this->getDefaultApiRouteStub($name);
+            case 'routes/admin':
+                return $this->getDefaultAdminRouteStub($name);
             case 'module':
                 return $this->getDefaultModuleStub($name);
             case 'hooks':
@@ -159,10 +224,24 @@ class MakeModuleCommand extends Command
     protected function getDefaultViewStub($name)
     {
         return <<<HTML
-<div>
-    <h1>{$name} 模块</h1>
-    <p>这是 {$name} 模块的首页。</p>
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">{$name} 模块</div>
+
+                <div class="card-body">
+                    <h1>{$name} 模块</h1>
+                    <p>这是 {$name} 模块的首页。</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+@endsection
 HTML;
     }
     
@@ -171,7 +250,7 @@ HTML;
         return <<<PHP
 <?php
 
-namespace App\\Modules\\{$name}\\Providers;
+namespace App\\{$name}\\Providers;
 
 use Illuminate\\Support\\ServiceProvider;
 
@@ -183,7 +262,10 @@ class {$name}ServiceProvider extends ServiceProvider
     public function boot()
     {
         \$this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
-        \$this->loadViewsFrom(__DIR__ . '/../Views', '{$name}');
+        \$this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
+        \$this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
+        
+        \$this->loadViewsFrom(__DIR__ . '/../Resources/views', '{$name}');
         
         // 加载迁移文件
         \$this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
@@ -200,23 +282,96 @@ class {$name}ServiceProvider extends ServiceProvider
 PHP;
     }
     
-    protected function getDefaultControllerStub($name)
+    protected function getDefaultFrontendControllerStub($name)
     {
         return <<<PHP
 <?php
 
-namespace App\\Modules\\{$name}\\Controllers;
+namespace App\\{$name}\\Http\\Controllers\\Frontend;
 
-use App\\Http\\Controllers\\Controller;
+use Fastcmf\\Modules\\Http\\Controllers\\Frontend\\HomeBaseController;
 
-class {$name}Controller extends Controller
+class {$name}Controller extends HomeBaseController
 {
     /**
      * 显示主页
      */
     public function index()
     {
-        return view('{$name}::index');
+        return \$this->view('{$name}::{$name}.index');
+    }
+    
+    /**
+     * 显示详情页
+     */
+    public function show(\$id)
+    {
+        return \$this->view('{$name}::{$name}.show', ['id' => \$id]);
+    }
+}
+PHP;
+    }
+    
+    protected function getDefaultBackendControllerStub($name)
+    {
+        return <<<PHP
+<?php
+
+namespace App\\{$name}\\Http\\Controllers\\Backend;
+
+use Fastcmf\\Modules\\Http\\Controllers\\Backend\\AdminBaseController;
+
+class {$name}Controller extends AdminBaseController
+{
+    /**
+     * 显示列表页
+     */
+    public function index()
+    {
+        return \$this->view('{$name}::admin.{$name}.index');
+    }
+    
+    /**
+     * 显示创建页
+     */
+    public function create()
+    {
+        return \$this->view('{$name}::admin.{$name}.create');
+    }
+    
+    /**
+     * 保存数据
+     */
+    public function store()
+    {
+        // 处理保存逻辑
+        return \$this->adminSuccess('{$name}添加成功');
+    }
+    
+    /**
+     * 显示编辑页
+     */
+    public function edit(\$id)
+    {
+        return \$this->view('{$name}::admin.{$name}.edit', ['id' => \$id]);
+    }
+    
+    /**
+     * 更新数据
+     */
+    public function update(\$id)
+    {
+        // 处理更新逻辑
+        return \$this->adminSuccess('{$name}更新成功');
+    }
+    
+    /**
+     * 删除数据
+     */
+    public function destroy(\$id)
+    {
+        // 处理删除逻辑
+        return \$this->adminSuccess('{$name}删除成功');
     }
 }
 PHP;
@@ -224,17 +379,17 @@ PHP;
     
     protected function getDefaultWebRouteStub($name)
     {
-        $controllerName = $name . 'Controller';
         $routeName = Str::lower($name);
         
         return <<<PHP
 <?php
 
 use Illuminate\\Support\\Facades\\Route;
-use App\\Modules\\{$name}\\Controllers\\{$controllerName};
+use App\\{$name}\\Http\\Controllers\\Frontend\\{$name}Controller;
 
-Route::prefix('{$routeName}')->group(function () {
-    Route::get('/', [{$controllerName}::class, 'index']);
+Route::prefix('{$routeName}')->name('{$routeName}.')->group(function () {
+    Route::get('/', [{$name}Controller::class, 'index'])->name('index');
+    Route::get('/{id}', [{$name}Controller::class, 'show'])->name('show');
 });
 PHP;
     }
@@ -248,8 +403,29 @@ PHP;
 
 use Illuminate\\Support\\Facades\\Route;
 
-Route::prefix('api/{$routeName}')->group(function () {
+Route::prefix('api/{$routeName}')->name('api.{$routeName}.')->group(function () {
     // API路由定义
+});
+PHP;
+    }
+    
+    protected function getDefaultAdminRouteStub($name)
+    {
+        $routeName = Str::lower($name);
+        
+        return <<<PHP
+<?php
+
+use Illuminate\\Support\\Facades\\Route;
+use App\\{$name}\\Http\\Controllers\\Backend\\{$name}Controller;
+
+Route::prefix('admin/{$routeName}')->name('admin.{$routeName}.')->middleware(['web', 'auth'])->group(function () {
+    Route::get('/', [{$name}Controller::class, 'index'])->name('index');
+    Route::get('/create', [{$name}Controller::class, 'create'])->name('create');
+    Route::post('/', [{$name}Controller::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [{$name}Controller::class, 'edit'])->name('edit');
+    Route::put('/{id}', [{$name}Controller::class, 'update'])->name('update');
+    Route::delete('/{id}', [{$name}Controller::class, 'destroy'])->name('destroy');
 });
 PHP;
     }

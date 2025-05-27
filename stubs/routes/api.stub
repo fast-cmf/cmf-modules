@@ -2,6 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('api/{{module_name}}')->group(function () {
+Route::prefix('api/{{module_name}}')->name('api.{{module_name}}.')->group(function () {
     // API路由定义
 }); 

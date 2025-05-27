@@ -9,7 +9,7 @@ return [
     | 默认模块命名空间
     |
     */
-    'namespace' => 'App\\Modules',
+    'namespace' => 'App',
 
     /*
     |--------------------------------------------------------------------------
@@ -19,7 +19,7 @@ return [
     | 指定模块存储位置
     |
     */
-    'path' => app_path('Modules'),
+    'path' => app_path(),
 
     /*
     |--------------------------------------------------------------------------
@@ -40,9 +40,12 @@ return [
     |
     */
     'structure' => [
-        'controllers' => 'Controllers',
+        'controllers' => [
+            'frontend' => 'Http/Controllers/Frontend',
+            'backend' => 'Http/Controllers/Backend',
+        ],
         'providers' => 'Providers',
-        'views' => 'Views',
+        'views' => 'Resources/views',
         'routes' => 'Routes',
         'models' => 'Models',
         'migrations' => 'Database/Migrations',
