@@ -35,15 +35,10 @@ class MakeThemeCommand extends Command
             $name = 'admin_' . $name;
         }
         
-        // 使用绝对路径
-        $publicPath = public_path();
-        if (empty($publicPath)) {
-            $this->error("无法获取public目录路径。");
-            return 1;
-        }
+        // 使用配置中的主题路径
+        $themesPath = config('themes.path', public_path('themes'));
         
-        // 创建themes目录
-        $themesPath = $publicPath . '/themes';
+        // 确保主题目录存在
         if (!is_dir($themesPath)) {
             try {
                 mkdir($themesPath, 0755, true);
@@ -56,7 +51,6 @@ class MakeThemeCommand extends Command
         
         // 主题路径
         $path = $themesPath . '/' . $name;
-        $this->info("将创建主题到路径: {$path}");
         
         // 检查主题是否已存在
         if (is_dir($path)) {
@@ -67,7 +61,7 @@ class MakeThemeCommand extends Command
             }
             
             $this->warn("正在覆盖已存在的主题 [$name]...");
-            $this->deleteDirectory($path);
+            File::deleteDirectory($path);
         }
 
         // 创建主题目录结构
@@ -80,86 +74,59 @@ class MakeThemeCommand extends Command
     }
 
     /**
-     * 递归删除目录
-     */
-    protected function deleteDirectory($dir)
-    {
-        if (!file_exists($dir)) {
-            return true;
-        }
-        
-        if (!is_dir($dir)) {
-            return unlink($dir);
-        }
-        
-        foreach (scandir($dir) as $item) {
-            if ($item == '.' || $item == '..') {
-                continue;
-            }
-            
-            if (!$this->deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
-                return false;
-            }
-        }
-        
-        return rmdir($dir);
-    }
-
-    /**
      * 生成主题目录结构
      */
     protected function generateThemeStructure($name, $path, $isAdmin = false)
     {
         try {
             // 创建基本目录
-            if (!is_dir($path)) {
-                mkdir($path, 0755, true);
-                $this->info("创建主题目录: {$path}");
+            if (!File::isDirectory($path)) {
+                File::makeDirectory($path, 0755, true);
             }
             
             // 创建子目录
             $this->createThemeDirectories($name, $path);
             
             // 创建主题配置文件
-            file_put_contents("$path/theme.json", $this->getThemeConfigStub($name));
+            File::put("$path/theme.json", $this->getThemeConfigStub($name));
             
             // 创建默认样式文件
             $cssPath = "$path/assets/css";
-            if (!is_dir($cssPath)) {
-                mkdir($cssPath, 0755, true);
+            if (!File::isDirectory($cssPath)) {
+                File::makeDirectory($cssPath, 0755, true);
             }
-            file_put_contents("$cssPath/style.css", $this->getStyleStub());
+            File::put("$cssPath/style.css", $this->getStyleStub());
             
             // 创建默认JS文件
             $jsPath = "$path/assets/js";
-            if (!is_dir($jsPath)) {
-                mkdir($jsPath, 0755, true);
+            if (!File::isDirectory($jsPath)) {
+                File::makeDirectory($jsPath, 0755, true);
             }
-            file_put_contents("$jsPath/app.js", $this->getJsStub());
+            File::put("$jsPath/app.js", $this->getJsStub());
             
             // 创建默认布局文件
             $layoutsPath = "$path/views/layouts";
-            if (!is_dir($layoutsPath)) {
-                mkdir($layoutsPath, 0755, true);
+            if (!File::isDirectory($layoutsPath)) {
+                File::makeDirectory($layoutsPath, 0755, true);
             }
             
             if ($isAdmin) {
                 // 创建后台布局文件
-                file_put_contents("$layoutsPath/admin.blade.php", $this->getAdminLayoutStub($name));
+                File::put("$layoutsPath/admin.blade.php", $this->getAdminLayoutStub($name));
                 
                 // 创建后台首页视图
                 $viewsPath = "$path/views";
-                file_put_contents("$viewsPath/index.blade.php", $this->getAdminIndexViewStub());
+                File::put("$viewsPath/index.blade.php", $this->getAdminIndexViewStub());
                 
                 // 创建后台表单视图
-                file_put_contents("$viewsPath/form.blade.php", $this->getAdminFormViewStub());
+                File::put("$viewsPath/form.blade.php", $this->getAdminFormViewStub());
             } else {
                 // 创建前台布局文件
-                file_put_contents("$layoutsPath/default.blade.php", $this->getLayoutStub($name));
+                File::put("$layoutsPath/default.blade.php", $this->getLayoutStub($name));
                 
                 // 创建默认首页视图
                 $viewsPath = "$path/views";
-                file_put_contents("$viewsPath/index.blade.php", $this->getIndexViewStub());
+                File::put("$viewsPath/index.blade.php", $this->getIndexViewStub());
             }
             
             return true;
@@ -186,10 +153,9 @@ class MakeThemeCommand extends Command
         
         foreach ($directories as $directory) {
             $fullPath = "$path/$directory";
-            if (!is_dir($fullPath)) {
+            if (!File::isDirectory($fullPath)) {
                 try {
-                    mkdir($fullPath, 0755, true);
-                    $this->line("创建目录: {$fullPath}");
+                    File::makeDirectory($fullPath, 0755, true);
                 } catch (\Exception $e) {
                     $this->error("无法创建目录 {$fullPath}: " . $e->getMessage());
                 }

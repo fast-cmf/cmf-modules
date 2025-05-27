@@ -53,9 +53,6 @@ class ModulesServiceProvider extends ServiceProvider
             __DIR__ . '/../../config/themes.php', 'themes'
         );
 
-        // 确保基本目录结构存在
-        $this->ensureModulesDirectoryExists();
-
         // 注册模块管理器
         $this->app->singleton('modules', function ($app) {
             return new ModuleManager($app);
@@ -94,28 +91,6 @@ class ModulesServiceProvider extends ServiceProvider
             
             // 触发模块加载后钩子
             Hook::trigger('module.load.after', $module);
-        }
-    }
-
-    /**
-     * 确保基本的应用目录结构存在
-     */
-    protected function ensureModulesDirectoryExists()
-    {
-        $directories = [
-            app_path(),
-        ];
-
-        foreach ($directories as $directory) {
-            if (!is_dir($directory)) {
-                mkdir($directory, 0755, true);
-            }
-        }
-        
-        // 确保主题目录存在
-        $themesPath = config('themes.path', public_path('themes'));
-        if (!is_dir($themesPath)) {
-            mkdir($themesPath, 0755, true);
         }
     }
     

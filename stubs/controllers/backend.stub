@@ -3,7 +3,6 @@
 namespace App\{{ModuleName}}\Http\Controllers;
 
 use Fastcmf\Modules\Http\Controllers\AdminBaseController;
-use Fastcmf\Modules\Facades\Theme;
 
 class Admin{{ModuleName}}Controller extends AdminBaseController
 {
@@ -12,20 +11,7 @@ class Admin{{ModuleName}}Controller extends AdminBaseController
      */
     public function index()
     {
-        // 尝试使用主题中的模块视图
-        $theme = Theme::adminCurrent();
-        $viewName = '{{ModuleName}}::admin.{{ModuleName}}.index';
-        
-        // 如果主题中存在该模块的视图，则使用主题视图
-        $themePath = config('themes.path', public_path('themes')) . '/' . $theme->getName();
-        $moduleViewPath = $themePath . '/' . config('themes.structure.views', 'views') . '/modules/{{ModuleName}}/{{module_name}}/index.blade.php';
-        
-        if (file_exists($moduleViewPath)) {
-            return $this->view($viewName);
-        }
-        
-        // 否则使用主题的默认视图
-        return $this->view('theme::admin.index', ['module' => '{{ModuleName}}']);
+        return $this->view();
     }
     
     /**
@@ -33,20 +19,7 @@ class Admin{{ModuleName}}Controller extends AdminBaseController
      */
     public function create()
     {
-        // 尝试使用主题中的模块视图
-        $theme = Theme::adminCurrent();
-        $viewName = '{{ModuleName}}::admin.{{ModuleName}}.create';
-        
-        // 如果主题中存在该模块的视图，则使用主题视图
-        $themePath = config('themes.path', public_path('themes')) . '/' . $theme->getName();
-        $moduleViewPath = $themePath . '/' . config('themes.structure.views', 'views') . '/modules/{{ModuleName}}/{{module_name}}/create.blade.php';
-        
-        if (file_exists($moduleViewPath)) {
-            return $this->view($viewName);
-        }
-        
-        // 否则使用主题的默认视图
-        return $this->view('theme::admin.form', ['module' => '{{ModuleName}}', 'action' => 'create']);
+        return $this->view();
     }
     
     /**
@@ -63,20 +36,7 @@ class Admin{{ModuleName}}Controller extends AdminBaseController
      */
     public function edit($id)
     {
-        // 尝试使用主题中的模块视图
-        $theme = Theme::adminCurrent();
-        $viewName = '{{ModuleName}}::admin.{{ModuleName}}.edit';
-        
-        // 如果主题中存在该模块的视图，则使用主题视图
-        $themePath = config('themes.path', public_path('themes')) . '/' . $theme->getName();
-        $moduleViewPath = $themePath . '/' . config('themes.structure.views', 'views') . '/modules/{{ModuleName}}/{{module_name}}/edit.blade.php';
-        
-        if (file_exists($moduleViewPath)) {
-            return $this->view($viewName, ['id' => $id]);
-        }
-        
-        // 否则使用主题的默认视图
-        return $this->view('theme::admin.form', ['module' => '{{ModuleName}}', 'action' => 'edit', 'id' => $id]);
+        return $this->view('', ['id' => $id]);
     }
     
     /**

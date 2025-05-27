@@ -235,4 +235,25 @@ class ModuleManager
         
         return true;
     }
+
+    protected function createModuleDirectories($modulePath)
+    {
+        $directories = [
+            'Http/Controllers',
+            'Http/Middleware',
+            'Http/Requests',
+            'Models',
+            'Providers',
+            'Routes',
+            'Database/Migrations',
+            'Database/Seeders',
+        ];
+
+        foreach ($directories as $directory) {
+            $path = $modulePath . '/' . $directory;
+            if (!is_dir($path)) {
+                mkdir($path, 0755, true);
+            }
+        }
+    }
 } 

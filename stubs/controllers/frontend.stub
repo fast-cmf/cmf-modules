@@ -3,7 +3,6 @@
 namespace App\{{ModuleName}}\Http\Controllers;
 
 use Fastcmf\Modules\Http\Controllers\HomeBaseController;
-use Fastcmf\Modules\Facades\Theme;
 
 class {{ModuleName}}Controller extends HomeBaseController
 {
@@ -12,20 +11,7 @@ class {{ModuleName}}Controller extends HomeBaseController
      */
     public function index()
     {
-        // 尝试使用主题中的模块视图
-        $theme = Theme::current();
-        $viewName = '{{ModuleName}}::{{ModuleName}}.index';
-        
-        // 如果主题中存在该模块的视图，则使用主题视图
-        $themePath = config('themes.path', public_path('themes')) . '/' . $theme->getName();
-        $moduleViewPath = $themePath . '/' . config('themes.structure.views', 'views') . '/modules/{{ModuleName}}/{{ModuleName}}/index.blade.php';
-        
-        if (file_exists($moduleViewPath)) {
-            return $this->view($viewName);
-        }
-        
-        // 否则使用主题的默认视图
-        return $this->view('theme::index', ['module' => '{{ModuleName}}']);
+        return $this->view();
     }
     
     /**
@@ -33,19 +19,6 @@ class {{ModuleName}}Controller extends HomeBaseController
      */
     public function show($id)
     {
-        // 尝试使用主题中的模块视图
-        $theme = Theme::current();
-        $viewName = '{{ModuleName}}::{{ModuleName}}.show';
-        
-        // 如果主题中存在该模块的视图，则使用主题视图
-        $themePath = config('themes.path', public_path('themes')) . '/' . $theme->getName();
-        $moduleViewPath = $themePath . '/' . config('themes.structure.views', 'views') . '/modules/{{ModuleName}}/{{ModuleName}}/show.blade.php';
-        
-        if (file_exists($moduleViewPath)) {
-            return $this->view($viewName, ['id' => $id]);
-        }
-        
-        // 否则使用主题的默认视图
-        return $this->view('theme::index', ['module' => '{{ModuleName}}', 'id' => $id]);
+        return $this->view('', ['id' => $id]);
     }
 } 

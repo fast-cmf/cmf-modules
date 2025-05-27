@@ -51,21 +51,6 @@ class ThemeViewFinder extends FileViewFinder
             }
         }
         
-        // 解析模块名、控制器和方法
-        $parts = explode('/', $name);
-        if (count($parts) >= 3) {
-            $moduleName = $parts[0];
-            $controller = $parts[1];
-            $method = $parts[2];
-            
-            // 尝试查找视图文件
-            $path = $this->getThemeViewPath($theme) . "/{$moduleName}/{$controller}/{$method}.blade.php";
-            
-            if (file_exists($path)) {
-                return $path;
-            }
-        }
-        
         // 常规路径查找
         $path = $this->getThemeViewPath($theme) . '/' . str_replace('.', '/', $name) . '.blade.php';
         
@@ -92,21 +77,6 @@ class ThemeViewFinder extends FileViewFinder
             }
         }
         
-        // 解析模块名、控制器和方法
-        $parts = explode('/', $name);
-        if (count($parts) >= 3) {
-            $moduleName = $parts[0];
-            $controller = $parts[1];
-            $method = $parts[2];
-            
-            // 尝试查找视图文件
-            $path = $this->getThemeViewPath($theme) . "/{$moduleName}/{$controller}/{$method}.blade.php";
-            
-            if (file_exists($path)) {
-                return $path;
-            }
-        }
-        
         // 常规路径查找
         $path = $this->getThemeViewPath($theme) . '/' . str_replace('.', '/', $name) . '.blade.php';
         
@@ -126,7 +96,7 @@ class ThemeViewFinder extends FileViewFinder
         $theme = Theme::current()->getName();
         
         // 先检查主题中的模块视图
-        $themePath = $this->getThemeViewPath($theme) . '/modules/' . $module . '/' . strtolower($module) . '/' . str_replace('.', '/', $view) . '.blade.php';
+        $themePath = $this->getThemeViewPath($theme) . '/modules/' . $module . '/' . str_replace('.', '/', $view) . '.blade.php';
         
         if (file_exists($themePath)) {
             return $themePath;
@@ -148,7 +118,7 @@ class ThemeViewFinder extends FileViewFinder
         $view = str_replace('admin.', '', $view);
         
         // 先检查后台主题中的模块视图
-        $themePath = $this->getThemeViewPath($theme) . '/modules/' . $module . '/' . strtolower($module) . '/' . str_replace('.', '/', $view) . '.blade.php';
+        $themePath = $this->getThemeViewPath($theme) . '/modules/' . $module . '/' . str_replace('.', '/', $view) . '.blade.php';
         
         if (file_exists($themePath)) {
             return $themePath;

@@ -300,24 +300,6 @@ class {$name}ServiceProvider extends ServiceProvider
         \$this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
         \$this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
         
-        // 从主题目录加载视图
-        // 前台主题
-        \$frontThemePath = config('themes.path', public_path('themes')) . '/' . Theme::current()->getName();
-        \$frontViewsPath = \$frontThemePath . '/' . config('themes.structure.views', 'views') . '/modules/{$name}';
-        
-        if (is_dir(\$frontViewsPath)) {
-            \$this->loadViewsFrom(\$frontViewsPath, '{$name}');
-        }
-        
-        // 后台主题
-        \$adminThemePath = config('themes.path', public_path('themes')) . '/' . Theme::adminCurrent()->getName();
-        \$adminViewsPath = \$adminThemePath . '/' . config('themes.structure.views', 'views') . '/modules/{$name}';
-        
-        if (is_dir(\$adminViewsPath)) {
-            // 使用相同的命名空间，但优先级较低
-            \$this->loadViewsFrom(\$adminViewsPath, '{$name}');
-        }
-        
         // 加载迁移文件
         \$this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
     }

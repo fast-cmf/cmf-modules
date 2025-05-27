@@ -60,7 +60,12 @@ class ThemeViewFinder extends FileViewFinder
             if ($this->theme && $this->theme->exists()) {
                 $themePath = $this->theme->getThemePath() . '/' . config('themes.structure.views', 'views');
                 
-                $path = $themePath . '/' . str_replace('.', '/', $name) . '.blade.php';
+                // 如果是绝对路径（以/开头）
+                if (strpos($name, '/') === 0) {
+                    $path = $themePath . $name . '.blade.php';
+                } else {
+                    $path = $themePath . '/' . str_replace('.', '/', $name) . '.blade.php';
+                }
                 
                 if (file_exists($path)) {
                     return $path;
