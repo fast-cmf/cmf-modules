@@ -49,7 +49,7 @@ class Theme
     public function getThemePath($theme = null)
     {
         $theme = $theme ?: $this->name;
-        return Config::get('themes.path', resource_path('themes')) . '/' . $theme;
+        return Config::get('themes.path', public_path('themes')) . '/' . $theme;
     }
 
     /**
@@ -66,7 +66,7 @@ class Theme
     public function asset($path)
     {
         $themesUrl = Config::get('themes.url', '/themes');
-        return $themesUrl . '/' . $this->name . '/' . ltrim($path, '/');
+        return $themesUrl . '/' . $this->name . '/' . Config::get('themes.structure.assets', 'assets') . '/' . $path;
     }
 
     /**
@@ -74,7 +74,7 @@ class Theme
      */
     public function getViewPath($view)
     {
-        return $this->path . '/views/' . str_replace('.', '/', $view) . '.blade.php';
+        return $this->path . '/' . config('themes.structure.views', 'views') . '/' . str_replace('.', '/', $view) . '.blade.php';
     }
 
     /**
@@ -127,7 +127,7 @@ class Theme
      */
     public function getConfig($key = null, $default = null)
     {
-        $configPath = $this->path . '/theme.json';
+        $configPath = $this->path . '/' . config('themes.structure.config', 'config') . '/theme.json';
         
         if (!File::exists($configPath)) {
             return $default;

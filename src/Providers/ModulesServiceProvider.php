@@ -115,7 +115,7 @@ class ModulesServiceProvider extends ServiceProvider
         }
         
         // 确保主题目录存在
-        $themesPath = config('themes.path', resource_path('themes'));
+        $themesPath = config('themes.path', public_path('themes'));
         if (!is_dir($themesPath)) {
             mkdir($themesPath, 0755, true);
         }

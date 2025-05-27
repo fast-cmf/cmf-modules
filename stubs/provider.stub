@@ -3,6 +3,7 @@
 namespace App\{{ModuleName}}\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Fastcmf\Modules\Facades\Theme;
 
 class {{ModuleName}}ServiceProvider extends ServiceProvider
 {
@@ -15,7 +16,13 @@ class {{ModuleName}}ServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
         $this->loadRoutesFrom(__DIR__ . '/../Routes/admin.php');
         
-        $this->loadViewsFrom(__DIR__ . '/../Resources/views', '{{ModuleName}}');
+        // 从主题目录加载视图
+        $themePath = config('themes.path', public_path('themes')) . '/' . Theme::current()->getName();
+        $viewsPath = $themePath . '/' . config('themes.structure.views', 'views') . '/modules/{{ModuleName}}';
+        
+        if (is_dir($viewsPath)) {
+            $this->loadViewsFrom($viewsPath, '{{ModuleName}}');
+        }
         
         // 加载迁移文件
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');

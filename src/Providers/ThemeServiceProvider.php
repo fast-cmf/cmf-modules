@@ -22,6 +22,9 @@ class ThemeServiceProvider extends ServiceProvider
         
         // 注册中间件
         $this->registerMiddleware();
+        
+        // 注册Blade指令
+        $this->registerBladeDirectives();
     }
 
     /**
@@ -29,6 +32,11 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // 注册主题实例
+        $this->app->singleton('theme', function ($app) {
+            return Theme::current();
+        });
+        
         // 合并配置
         $this->mergeConfigFrom(
             __DIR__ . '/../../config/themes.php', 'themes'
@@ -57,7 +65,7 @@ class ThemeServiceProvider extends ServiceProvider
      */
     protected function publishAssets()
     {
-        $themesPath = config('themes.path', resource_path('themes'));
+        $themesPath = config('themes.path', public_path('themes'));
         
         if (!is_dir($themesPath)) {
             return;
@@ -85,5 +93,15 @@ class ThemeServiceProvider extends ServiceProvider
         
         // 注册主题中间件
         $router->aliasMiddleware('theme', \Fastcmf\Modules\Middleware\ThemeMiddleware::class);
+    }
+    
+    /**
+     * 注册Blade指令
+     */
+    protected function registerBladeDirectives()
+    {
+        \Blade::directive('theme', function ($expression) {
+            return "<?php echo app('theme')->asset($expression); ?>";
+        });
     }
 } 

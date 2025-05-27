@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\{{ModuleName}}\Http\Controllers\Frontend\{{ModuleName}}Controller;
+use App\{{ModuleName}}\Http\Controllers\{{ModuleName}}Controller;
 
 Route::prefix('{{module_name}}')->name('{{module_name}}.')->group(function () {
     Route::get('/', [{{ModuleName}}Controller::class, 'index'])->name('index');
